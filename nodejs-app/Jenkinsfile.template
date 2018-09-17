@@ -2,6 +2,7 @@ pipeline {
    agent { label 'nodejs-app' }
   options { 
     buildDiscarder(logRotator(numToKeepStr: '2'))
+    skipDefaultCheckout true
   }
     post {
     aborted {
@@ -11,8 +12,8 @@ pipeline {
    stages {
       stage('Test') {
         steps {
-        sh 'java -version'
-          container('nodejs') {
+        checkout scm
+        container('nodejs') {
             echo 'Hello World!'   
               sh 'node --version'
           }
