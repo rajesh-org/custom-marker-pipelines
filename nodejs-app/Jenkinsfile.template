@@ -6,6 +6,9 @@ pipeline {
     skipDefaultCheckout true
     preserveStashes(buildCount: 2)
    }
+ triggers {
+    eventTrigger simpleMatch('hello-api-push-event')
+  }
    stages {
       stage('Say Hello') {
          steps {
@@ -95,23 +98,21 @@ spec:
         }
       }
     }
-   stage('Deploy') {
+    stage('Deploy') {
       when {
         beforeAgent true
         branch 'master'
       }
       options {
-        timeout(time: 30, unit: 'SECONDS') 
+        timeout(time: 60, unit: 'SECONDS') 
       }
       input {
         message "Should we deploy?"
         submitterParameter "APPROVER"
       }
       steps {
-        echo "Continuing with deployment - approved by ${APPROVER}"
-        unstash 'app'
+        kubeDeploy(env.IMAGE_NAME, env.IMAGE_TAG)
       }
     }
-    
   }
 }
