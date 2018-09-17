@@ -49,11 +49,14 @@ spec:
           sh '/opt/testcafe/docker/testcafe-docker.sh "chromium --no-sandbox,firefox" tests/*.js -r xunit:res.xml'
         }
       }
-            post {
-             success {
-               stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
-            }
+     post {
+       success {
+          stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
          }
+       always {
+          junit 'res.xml'
+         }
+       }
       }
       stage('Build and Push Image') {
          when {
