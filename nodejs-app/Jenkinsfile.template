@@ -1,5 +1,13 @@
 pipeline {
    agent { label 'nodejs-app' }
+  options { 
+    buildDiscarder(logRotator(numToKeepStr: '2'))
+  }
+    post {
+    aborted {
+      echo "Why didn't you push my button?"
+    }
+  }
    stages {
       stage('Test') {
         steps {
@@ -37,7 +45,4 @@ pipeline {
       }
     }
    }
-  options { 
-    buildDiscarder(logRotator(numToKeepStr: '2'))
-  }
 }
