@@ -16,7 +16,7 @@ pipeline {
     stage('Test') {
         steps {
         checkout scm
-        container('nodejs') {
+        container('nodejs-app') {
             echo 'Hello World!'   
             sh 'node --version'
           }
