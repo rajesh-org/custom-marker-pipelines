@@ -34,13 +34,21 @@ spec:
           """
         }
       }
-           steps {
-             checkout scm
-             container('nodejs') {
-               echo 'Hello World!'   
-               sh 'node -v'
-               }
-             }
+      steps {
+        checkout scm
+        container('nodejs') {
+          echo 'Hello World!'   
+          sh '''
+            node -v
+            npm install express
+            npm install pug --save
+            node ./hello.js &
+          '''
+        }
+        container('testcafe') {
+          sh '/opt/testcafe/docker/testcafe-docker.sh "chromium --no-sandbox,firefox" tests/*.js -r xunit:res.xml'
+        }
+      }
             post {
              success {
                stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
