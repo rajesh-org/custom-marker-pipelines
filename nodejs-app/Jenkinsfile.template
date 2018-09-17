@@ -12,7 +12,7 @@ pipeline {
          }
       }
       stage('Test') {
-          a      agent {
+          agent {
         kubernetes {
           label 'nodejs-app-inline'
           yaml """
