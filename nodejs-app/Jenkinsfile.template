@@ -1,16 +1,19 @@
 pipeline {
-   agent { label 'nodejs-app' }
-  options { 
-    buildDiscarder(logRotator(numToKeepStr: '2'))
-    skipDefaultCheckout true
-  }
-    post {
+   agent any
+   options { 
+     buildDiscarder(logRotator(numToKeepStr: '2'))
+     skipDefaultCheckout true
+   }
+   post {
+    success {
+     stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
+    }
     aborted {
       echo "Why didn't you push my button?"
     }
   }
-   stages {
-      stage('Test') {
+  stages {
+    stage('Test') {
         steps {
         checkout scm
         container('nodejs') {
@@ -18,17 +21,18 @@ pipeline {
               sh 'node --version'
           }
         }
-      }
+     }
     stage('Build and Push Image') {
       when {
         beforeAgent true
         branch 'master'
-      }
+       }
       steps {
         echo "TODO - build and push image"
-      }
+        unstash 'app'
+       }
     }
-        stage('Deploy') {
+    stage('Deploy') {
       when {
         beforeAgent true
         branch 'master'
@@ -44,5 +48,5 @@ pipeline {
         echo "Continuing with deployment - approved by ${APPROVER}"
       }
     }
-   }
+  }
 }
