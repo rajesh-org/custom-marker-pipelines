@@ -1,4 +1,4 @@
-library 'cd-accel@completed'
+library 'rajesh-org-pipeline-libraries@completed'
 pipeline {
    agent any
    options { 
