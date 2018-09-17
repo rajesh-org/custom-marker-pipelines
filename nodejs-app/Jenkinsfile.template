@@ -14,7 +14,7 @@ pipeline {
   }
   stages {
     stage('Test') {
-      agent { label 'nodejs-app' }
+      agent any
       steps {
         checkout scm
         container('nodejs') {
