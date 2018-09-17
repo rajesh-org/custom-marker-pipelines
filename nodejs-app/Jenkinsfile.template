@@ -1,45 +1,47 @@
 pipeline {
    agent any
    options { 
-     buildDiscarder(logRotator(numToKeepStr: '2'))
-     skipDefaultCheckout true
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    skipDefaultCheckout true
+    preserveStashes(buildCount: 2)
    }
-   post {
-    success {
-     stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
-    }
-    aborted {
-      echo "Why didn't you push my button?"
-    }
-  }
-  stages {
-    stage('Test') {
-      agent any
-      steps {
-        checkout scm
-        container('nodejs') {
-          echo 'Hello World!'   
-          sh 'node --version'
-        }
+   stages {
+      stage('Say Hello') {
+         steps {
+            echo 'Hello World!'   
+         }
       }
-    }
-    stage('Build and Push Image') {
-      when {
-        beforeAgent true
-        branch 'master'
-       }
-      steps {
-        echo "TODO - build and push image"
-        unstash 'app'
-       }
-    }
-    stage('Deploy') {
+      stage('Test') {
+          agent { label 'nodejs-app' }
+           steps {
+             checkout scm
+             container('nodejs') {
+               echo 'Hello World!'   
+               sh 'node -v'
+               }
+             }
+            post {
+             success {
+               stash name: 'app', includes: '*.js, public/**, views/*, Dockerfile'
+            }
+         }
+      }
+      stage('Build and Push Image') {
+         when {
+            beforeAgent true
+            branch 'master'
+         }
+         steps {
+            echo "TODO - build and push image"
+         }
+      }
+      stage('Deploy') {
       when {
         beforeAgent true
         branch 'master'
       }
       options {
-        timeout(time: 60, unit: 'SECONDS') 
+        timeout(time: 30, unit: 'SECONDS') 
       }
       input {
         message "Should we deploy?"
@@ -47,7 +49,9 @@ pipeline {
       }
       steps {
         echo "Continuing with deployment - approved by ${APPROVER}"
+        unstash 'app'
       }
     }
+    
   }
 }
