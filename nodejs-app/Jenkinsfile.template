@@ -11,7 +11,7 @@ pipeline {
             echo 'Hello World!'   
          }
       }
-stage('Test') {
+    stage('Test') {
       agent {
         kubernetes {
           label 'nodejs-app-inline'
@@ -44,25 +44,33 @@ spec:
           """
         }
       }
-      steps {
-        checkout scm
-        container('nodejs') {
-          sh '''
-            npm install express
-            npm install pug --save
-            node ./hello.js &
-          '''
-        }
-        script {
-          parallel chrome: {
-            container('testcafe-chrome') {
-              sh '/opt/testcafe/docker/testcafe-docker.sh "chromium --no-sandbox" tests/*.js -r xunit:res-chrome.xml'
+      stages {
+        stage('App Setup') {
+          steps {
+            checkout scm
+            container('nodejs') {
+              sh '''
+                npm install express
+                npm install pug --save
+                node ./hello.js &
+              '''
             }
-          }, 
-          firefox: {
-              container('testcafe-firefox') {
-                sh '/opt/testcafe/docker/testcafe-docker.sh firefox --ports 1339,1340 tests/*.js -r xunit:res-firefox.xml'
+          }
+        }
+        stage('Browser Tests') {
+          steps {
+            script {
+              parallel chrome: {
+                container('testcafe-chrome') {
+                  sh '/opt/testcafe/docker/testcafe-docker.sh "chromium --no-sandbox" tests/*.js -r xunit:res-chrome.xml'
+                }
+              }, 
+              firefox: {
+                  container('testcafe-firefox') {
+                    sh '/opt/testcafe/docker/testcafe-docker.sh firefox --ports 1339,1340 tests/*.js -r xunit:res-firefox.xml'
+                  }
               }
+            }
           }
         }
       }
