@@ -14,14 +14,15 @@ pipeline {
   }
   stages {
     stage('Test') {
-        steps {
+      agent { label 'nodejs-app' }
+      steps {
         checkout scm
-        container('nodejs-app') {
-            echo 'Hello World!'   
-            sh 'node --version'
-          }
+        container('nodejs') {
+          echo 'Hello World!'   
+          sh 'node --version'
         }
-     }
+      }
+    }
     stage('Build and Push Image') {
       when {
         beforeAgent true
