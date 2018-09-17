@@ -85,15 +85,17 @@ spec:
       }    
     }
     stage('Build and Push Image') {
-         when {
-            beforeAgent true
-            branch 'master'
-         }
-         steps {
-            echo "TODO - build and push image"
-         }
+      when {
+        beforeAgent true
+        branch 'master'
       }
-      stage('Deploy') {
+      steps {
+        dockerBuildPush(env.IMAGE_NAME, env.IMAGE_TAG) {
+          unstash 'app'
+        }
+      }
+    }
+   stage('Deploy') {
       when {
         beforeAgent true
         branch 'master'
